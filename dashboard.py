@@ -80,7 +80,7 @@ def main():
     st.title('Failure risk estimation for loan delivery')
 
     print("Lecture de la base de données")
-    df = pd.read_csv('dataset/data_for_mini_model.csv') # nrows=6)
+    df = pd.read_csv('dataset/micro_dataset.csv') # nrows=6)
     
     st.write("Data shape = {} ".format(df.shape))
     
