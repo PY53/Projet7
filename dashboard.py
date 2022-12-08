@@ -52,6 +52,7 @@ def request_prediction(model_uri, data):
     print("===================data type = ", type(data))
     data_json = {'data': data}
     print("===================data_json type = ", type(data_json))
+    print("predict url : ", model_uri)
     response = requests.request(method='POST', 
                                 headers=headers, url=model_uri, json=data_json)
 
@@ -68,6 +69,7 @@ def request_prediction(model_uri, data):
 
 def main():
     FLASK_URI = 'http://projet7-py0153.pythonanywhere.com/predict'
+
     # FLASK_URI = 'http://127.0.0.1:5000/predict'
     # LOAD_MODEL_URI = 'http://127.0.0.1:5000/loading_model'
     # response = requests.request(method='GET',  url=LOAD_MODEL_URI)

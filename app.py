@@ -9,7 +9,8 @@
 # numpy  1.21.6
 # requests 2.28.1
 # scikit-learn==1.0.2 => sklearn est utilisé à travers la fonction joblib
-# shap ...
+# lightgbm 3.3.3
+# shap 0.41.0
 
 # python app.py
 
