@@ -2,8 +2,8 @@ import pandas as pd
 import streamlit as st
 import requests
 import numpy as np
-from st_aggrid import AgGrid, GridOptionsBuilder
-from st_aggrid.shared import GridUpdateMode
+# from st_aggrid import AgGrid, GridOptionsBuilder
+# from st_aggrid.shared import GridUpdateMode
 import plotly.figure_factory as ff
 import plotly.express as px
 
@@ -13,36 +13,35 @@ import plotly.express as px
 # plotly 5.11.0 (conda install -c plotly plotly=5.11.0)
 # pandas 1.3.5
 
-
 # streamlit run dashboard.py
 
 # create an interactive table
-def aggrid_interactive_table(df: pd.DataFrame):
-    """Creates an st-aggrid interactive table based on a dataframe.
+# def aggrid_interactive_table(df: pd.DataFrame):
+#     """Creates an st-aggrid interactive table based on a dataframe.
 
-    Args:
-        df (pd.DataFrame]): Source dataframe
+#     Args:
+#         df (pd.DataFrame]): Source dataframe
 
-    Returns:
-        dict: The selected row
-    """
-    options = GridOptionsBuilder.from_dataframe(
-        df, enableRowGroup=True, enableValue=True, enablePivot=True
-    )
+#     Returns:
+#         dict: The selected row
+#     """
+#     options = GridOptionsBuilder.from_dataframe(
+#         df, enableRowGroup=True, enableValue=True, enablePivot=True
+#     )
 
-    options.configure_side_bar()
+#     options.configure_side_bar()
 
-    options.configure_selection("single")
-    selection = AgGrid(
-        df,
-        enable_enterprise_modules=True,
-        gridOptions=options.build(),
-        theme="light",
-        update_mode=GridUpdateMode.MODEL_CHANGED,
-        allow_unsafe_jscode=True,
-    )
+#     options.configure_selection("single")
+#     selection = AgGrid(
+#         df,
+#         enable_enterprise_modules=True,
+#         gridOptions=options.build(),
+#         theme="light",
+#         update_mode=GridUpdateMode.MODEL_CHANGED,
+#         allow_unsafe_jscode=True,
+#     )
 
-    return selection
+#     return selection
 
 
 def request_prediction(model_uri, data):
@@ -129,23 +128,23 @@ def main():
         
         # proceed_btn = st.button('Proceed')
         
-        selection=[]
-        if number_of_rows<1000 :  # En théorie 5000 ça passe mais ça ramme sur le PC
+#         selection=[]
+#         if number_of_rows<1000 :  # En théorie 5000 ça passe mais ça ramme sur le PC
             
-            selection = aggrid_interactive_table(df = df[(df[options[0]]>=values[0]) & (df[options[0]]<=values[1])])
-            st.write("clés de selection :", selection.keys())
-            # selection.data :  données d'entrées = df 
-            # selection.selected_rows :  ligne(s) sélectionnée(s) par l'utilisateur (mais ne contient pas l'index du df)
-            # selection.column_state : état des colonnes de la/les ligne(s) sélectionnée(s) par l'utilisateur
+#             selection = aggrid_interactive_table(df = df[(df[options[0]]>=values[0]) & (df[options[0]]<=values[1])])
+#             st.write("clés de selection :", selection.keys())
+#             # selection.data :  données d'entrées = df 
+#             # selection.selected_rows :  ligne(s) sélectionnée(s) par l'utilisateur (mais ne contient pas l'index du df)
+#             # selection.column_state : état des colonnes de la/les ligne(s) sélectionnée(s) par l'utilisateur
 
-            # TO DEBUG
-            if selection.column_state :
-                # transforme l'objet selection.selected_rows en DataFrame pour en extraire l'indice.
-                selected_row_index = pd.DataFrame(selection.selected_rows).rowIndex.values[0]
+#             # TO DEBUG
+#             if selection.column_state :
+#                 # transforme l'objet selection.selected_rows en DataFrame pour en extraire l'indice.
+#                 selected_row_index = pd.DataFrame(selection.selected_rows).rowIndex.values[0]
             
-                st.write("Vous avez selectionné l'index:", selected_row_index)  # ce n'est pas l'index de df
-                data = selection.selected_rows[0]
-                st.session_state.change_index=False
+#                 st.write("Vous avez selectionné l'index:", selected_row_index)  # ce n'est pas l'index de df
+#                 data = selection.selected_rows[0]
+#                 st.session_state.change_index=False
     
     # Pour permettre de sélectionner un index autre que celui filtré
     if 'change_index' not in st.session_state:
