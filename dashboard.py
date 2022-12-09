@@ -198,17 +198,34 @@ def main():
                 .format(pred["shap_values"]))
 
         features_importances = pd.DataFrame(pred["shap_values"], index=pred["features"])
-        features_importances["influence"]=["negative influence" if value<0 
-                                        else "positive influence" 
+        features_importances["influence"]=["positive" if value>0 
+                                        else "negative" 
                                         for value in pred["shap_values"]]
-        color_discrete_sequence = ['#ec7c34' if value<0 else '#609cd4'
-                                   for value in pred["shap_values"] ]
-        fig = px.bar(features_importances, 
+        
+        # features_importances["sorting"] = [str(i) for i in features_importances.index]
+        
+        red = px.colors.qualitative.Set1[0]
+        blue = px.colors.qualitative.Set1[1]
+        color = [ [blue, red] if pred["shap_values"][0]>0 else [red, blue] ]
+        # color_discrete_sequence = [red if value<0 else blue
+        #                            for value in pred["shap_values"]]
+        # Comportement étrange: color_discrete_sequence doit avoir la dimension de 
+        #                       features_importances["influence"] mais plotly ne prend
+        #                       que les 2 premières comme si il affectait ces valeurs
+        #                       à "negative" et "positive".
+        color_discrete_sequence = [None]*10
+        color_discrete_sequence[:2] = color[0]
+        print(color_discrete_sequence)
+        fig = px.bar(features_importances,
                      title="Importance des features sur la probabilité de défaillance",
-                    labels={"index":"Features Names", "value": "Features Importances",
-                           "variable": "SHAPley values"},
-                     color = 'influence',
+                     labels={"index":"Features Names", "value": "Features Importances"},
+                            #"variable": "SHAPley values"},
+                     color ="influence",
                      color_discrete_sequence=color_discrete_sequence)
+
+        fig.update_layout(xaxis={'categoryorder': "array",
+                                 'categoryarray': 
+                                         [str(i) for i in features_importances.index]})
         st.plotly_chart(fig)
         
 if __name__ == '__main__':
