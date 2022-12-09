@@ -11,6 +11,7 @@
 # scikit-learn==1.0.2 => sklearn est utilisé à travers la fonction joblib
 # lightgbm 3.3.3
 # shap 0.41.0
+# pandas 1.3.5
 
 # python app.py
 
@@ -21,6 +22,7 @@ import numpy as np
 from requests.models import Response
 import shap
 import time
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -75,6 +77,8 @@ def make_prediction():
         # print("============= data: {}=============".format(data['data']))
         print("============= data shape: {}=============".format(np.shape(data['data'])))
         # print("============= data : {}=============".format(request.form['data']))
+        
+        # transforme data['data'] en valeur numérique
         X = np.array([float(var) for var in data['data'][0]])
     elif request.method=='GET':
         # Pour transmettre les arguments avec la méthode GET on passe par la barre d'adresse :
@@ -82,6 +86,7 @@ def make_prediction():
         # Les ARGUMENTS sont séparés par des & tel que ci-dessous:
         # revenu_med=3.87&age_med=28.0&nb_piece_med=5.0&nb_chambre_moy=1.0&taille_pop=1425&occupation_moy=3.0&latitude=35.0&longitude=-119.0
         data = request.args
+        # transforme data['data'] en valeur numérique
         X = np.array([float(var) for var in data.values()])
     
     print("X shape = {}".format(X.shape))
@@ -94,22 +99,46 @@ def make_prediction():
     
     
     proba = proba.round(2)
-    print("============= prediction : {}=============".format([proba]))  
+    print("============= prediction : {}=============".format(proba))  
 
-    shap_wanted=False
-    if shap_wanted:
-        explainer = shap.TreeExplainer(loaded_model)
-        start = time.time()
-        shap_values = explainer.shap_values(df0[features_names].values)
-        time_shapvalues = time.time()-start
-        print("shapvalues computing time : {}" .format(time_shapvalues))
-      
+    df = pd.read_csv('dataset/micro_dataset.csv', nrows=2)
+    explainer = shap.TreeExplainer(loaded_model)
+    start = time.time()
+    # Shap_values contient 2 colonnes : une pour chaque classe.
+    # On ne s'intéresse qu'à la classe 1
+    shap_values = explainer.shap_values(X.reshape(1, -1))[1]
+    time_shapvalues = time.time()-start
+    
+    print(' ===== shap_values.shape', shap_values.shape)
+    nfeat=10
+    # shap_values_df=pd.DataFrame(shap_values, columns=df.columns).\
+    #                             sort_values(by=0, axis=1, ascending=False).iloc[:,:nfeat]
+    
+    shap_values_df = pd.DataFrame(shap_values.reshape(-1, 1), 
+                                  index=df.columns, columns=["value"])
+    shap_values_df["abs_value"] = abs(shap_values.reshape(-1, 1))
+        
+    shap_values_df = shap_values_df.sort_values(by="abs_value", axis=0,
+                                                ascending=False).iloc[:nfeat,:]
+    
+    shap_values = shap_values_df.value.values
+    features = shap_values_df.index.tolist() # columns
+    
+    # print("shapvalues : ", shap_values.tolist())
+    print("=====shapvalues computing time : {}" .format(time_shapvalues))
+    print("========features : ", features) 
+
+    answer = {"proba": proba, "shap_values": shap_values.tolist(), "features": features}
+    print('=======answer["shap_values"].shape : ', np.shape(answer["shap_values"]))
+    
     # On renvoie une réponse à l'aide de la classe response_class de flask
+    # on pourrait également utiliser app.jsonnify()
     response = app.response_class(
-        response=json.dumps([proba]),
+        response=json.dumps(answer),  # proba
         status=200,
         mimetype='application/json'
     )
+    print("======= response.json() : ", response.json)
     return response
 
 if __name__ == '__main__':
