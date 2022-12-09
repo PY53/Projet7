@@ -131,7 +131,7 @@ def make_prediction():
     answer = {"proba": proba, "shap_values": shap_values.tolist(), "features": features}
     print('=======answer["shap_values"].shape : ', np.shape(answer["shap_values"]))
     
-    # On renvoie une réponse à l'aide de la classe response_class de flask
+    # On renvoie une réponse à l aide de la classe response_class de flask
     # on pourrait également utiliser app.jsonnify()
     response = app.response_class(
         response=json.dumps(answer),  # proba

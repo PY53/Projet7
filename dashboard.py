@@ -106,8 +106,7 @@ def main():
         fig = px.histogram(df[options])
         st.plotly_chart(fig) # 
     
-        # x_min = np.round(x.min(), 2)
-        # x_max = np.round(x.max(), 2)
+        x = df[options[0]].values
         x_min = float(x.min())
         x_max = float(x.max())
         
