@@ -72,15 +72,21 @@ def request_prediction(model_uri, data):
 
 def main():
     # FLASK_URI = 'http://projet7-py0153.pythonanywhere.com/predict'
-    FLASK_URI = 'http://127.0.0.1:5000/predict'
-    # LOAD_MODEL_URI = 'http://127.0.0.1:5000/loading_model'
+    # FLASK_URI = 'http://127.0.0.1:5000/predict'
+    
     # response = requests.request(method='GET',  url=LOAD_MODEL_URI)
     # print("===================model loaded =====")
     
     api_choice = st.sidebar.selectbox(
         'Quelle API souhaitez vous utiliser',
-        ['Flask', 'Cortex', 'Ray Serve'])
-
+        ('pythonanywhere', 'local'))
+    if api_choice=="pythonanywhere": 
+        FLASK_URI='http://projet7-py0153.pythonanywhere.com/predict'
+    elif api_choice=="local": 
+        FLASK_URI='http://127.0.0.1:5000/predict'
+    else :
+        raise(error)
+    
     st.title('Failure risk estimation for loan delivery')
 
     print("Lecture de la base de données")
@@ -88,31 +94,16 @@ def main():
     
     st.write("Data shape = {} ".format(df.shape))
     
-    options = st.multiselect(
-    'Par Quelle feature souhaitez vous filtrer ?',
-    df.columns, "CNT_CHILDREN")
+    options = st.sidebar.multiselect(
+    'Par quelle feature souhaitez vous filtrer ?',
+    df.columns, 'CNT_CHILDREN')
 
-    st.write('You selected:', options[0])
-   
+    # st.write('You selected:', options)
     # filter_btn = st.button('Filtrer')
     
     if options:
 
-        # Histogram data
-        x = df[options[0]].values
-
-        # Group data together
-        hist_data = [x]
-        # hist_data = [x1, x2, x3]
-
-        group_labels = ['Group 1']
-        # group_labels = ['Group 1', 'Group 2', 'Group 3']
-
-#         # Create distplot with custom bin_size
-        # fig = ff.create_distplot(hist_data, group_labels, show_curve =False) # bin_size=[.1, .25, .5]   
-#         # Plot!
-        # st.plotly_chart(fig, use_container_width=True)
-        fig = px.histogram(x=df[options[0]].values)
+        fig = px.histogram(df[options])
         st.plotly_chart(fig) # 
     
         # x_min = np.round(x.min(), 2)
