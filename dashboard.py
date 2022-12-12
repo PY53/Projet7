@@ -133,9 +133,10 @@ def main():
             # selection.data :  données d'entrées = df 
             # selection.selected_rows :  ligne(s) sélectionnée(s) par l'utilisateur (mais ne contient pas l'index du df)
             # selection.column_state : état des colonnes de la/les ligne(s) sélectionnée(s) par l'utilisateur
-            print(np.shape(selection.column_state))
+
+            print("===================selected_rows.shape =", np.shape(selection.selected_rows))
             # TO DEBUG
-            if selection.column_state!=None :
+            if selection.selected_rows!=[] :
                 # transforme l'objet selection.selected_rows en DataFrame pour en extraire l'indice.
                 selected_row_index = pd.DataFrame(selection.selected_rows).rowIndex.values[0]
             
