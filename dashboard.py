@@ -134,7 +134,7 @@ def main():
             # selection.selected_rows :  ligne(s) sélectionnée(s) par l'utilisateur (mais ne contient pas l'index du df)
             # selection.column_state : état des colonnes de la/les ligne(s) sélectionnée(s) par l'utilisateur
 
-            print("===================selected_rows.shape =", np.shape(selection.selected_rows))
+            print("============selected_rows.shape =", np.shape(selection.selected_rows))
             # TO DEBUG
             if selection.selected_rows!=[] :
                 # transforme l'objet selection.selected_rows en DataFrame pour en extraire l'indice.
@@ -177,7 +177,7 @@ def main():
        
     if predict_btn:
         
-        # st.write("Data shape = {} ".format(np.shape(data)))
+        st.write("Demande de prédiction en cours...")
         
         pred = None
 
