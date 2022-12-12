@@ -133,14 +133,18 @@ def main():
             # selection.data :  données d'entrées = df 
             # selection.selected_rows :  ligne(s) sélectionnée(s) par l'utilisateur (mais ne contient pas l'index du df)
             # selection.column_state : état des colonnes de la/les ligne(s) sélectionnée(s) par l'utilisateur
-
+            print(np.shape(selection.column_state))
             # TO DEBUG
-            if selection.column_state :
+            if selection.column_state!=None :
                 # transforme l'objet selection.selected_rows en DataFrame pour en extraire l'indice.
                 selected_row_index = pd.DataFrame(selection.selected_rows).rowIndex.values[0]
             
+                print("selected_row_index : ", selected_row_index)
+                
+                # création d'une variable de session pour vérifier si l'indice change après un rechargement de la page
                 if "selected_row_index" not in st.session_state:
                     st.session_state.selected_row_index=selected_row_index
+                    
                 if st.session_state.selected_row_index!=selected_row_index :
                     st.session_state.change_index=False
                     st.session_state.selected_row_index=selected_row_index
