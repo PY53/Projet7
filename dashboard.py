@@ -6,13 +6,14 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import plotly.figure_factory as ff
 import plotly.express as px
+import sys
 
 # requests 2.28.1
 # streamlit 1.14.0
 # streamlit-aggrid 0.3.2 (installer avec Pip)
 # plotly 5.11.0 (conda install -c plotly plotly=5.11.0)
 # pandas 1.3.5
-
+sys.stdout.flush()
 
 # streamlit run dashboard.py
 

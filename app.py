@@ -65,8 +65,7 @@ def make_prediction():
     # # on affiche le résultat sur la page index.html avec la méthode GET
     # msg = "========== model loaded =============="
     # return render_template("index.html", text_from_app=msg)
-    
-    
+       
     proba = np.nan
     print("============= request method : {}=============".format(request.method))
 
