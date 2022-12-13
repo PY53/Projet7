@@ -39,8 +39,8 @@ def aggrid_interactive_table(df: pd.DataFrame):
         enable_enterprise_modules=True,
         gridOptions=options.build(),
         theme="light",
-        update_mode=GridUpdateMode.MODEL_CHANGED,
-        allow_unsafe_jscode=True,
+        update_mode=GridUpdateMode.SELECTION_CHANGED, # MODEL_CHANGED,
+        allow_unsafe_jscode=False, # True
     )
 
     return selection
@@ -70,6 +70,57 @@ def request_prediction(model_uri, data):
     print("response.json : ", response.json()) # contenu de la réponse en format json
     return response.json()
 
+def display_result(pred):
+        # Transforme la liste de pred["shap_values"] en valeur numérique
+        pred["shap_values"] = [round(float(value),3) for value in pred["shap_values"]]
+        
+        st.write("La proba d'une défaillance du client est de {:.2f}"
+                 .format(pred["proba"]))
+        print("=== Les features plus importantes lors de cette prédiction sont : === {}"
+                .format(pred["features"]))
+        print("=== Les shapley_values correspondantes sont === {} "
+                .format(pred["shap_values"]))
+
+        features_importances = pd.DataFrame(pred["shap_values"], index=pred["features"])
+        features_importances["influence"]=["positive" if value>0 
+                                        else "negative" 
+                                        for value in pred["shap_values"]]
+        # define color for negative and positive value in the graph
+        red = px.colors.qualitative.Set1[0]
+        blue = px.colors.qualitative.Set1[1]
+        color = [ [blue, red] if pred["shap_values"][0]>0 else [red, blue] ]
+        
+        # Comportement étrange: color_discrete_sequence doit avoir la dimension de 
+        #                       features_importances["influence"] mais plotly ne prend
+        #                       que les 2 premières comme si il affectait ces valeurs
+        #                       à "negative" et "positive".
+        color_discrete_sequence = [None]*10
+        color_discrete_sequence[:2] = color[0]
+        
+        fig = px.bar(features_importances,
+                     title="Importance des features dans la prédiction de la probabilité de défaillance",
+                     labels={"index":"Features Names", "value": "Features Importances"},
+                            #"variable": "SHAPley values"},
+                     color ="influence",
+                     color_discrete_sequence=color_discrete_sequence)
+        # pour afficher les valeurs tels qu'elles sont dans le df (sinon px s'amuse à les réordonnancer)
+        fig.update_layout(xaxis={'categoryorder': "array",
+                                 'categoryarray': 
+                                         [str(i) for i in features_importances.index]})
+        st.plotly_chart(fig)
+        path="dataset/"
+        df_tmp = pd.read_csv(path+'HomeCredit_columns_description.csv', encoding_errors='ignore')
+        features_description=dict()
+        for feature_name in pred["features"]:
+            if feature_name in df_tmp.Row.values:
+                features_description[feature_name] = df_tmp[df_tmp.Row==feature_name].Description.values[0]
+                
+        st.write(features_description)
+                
+#############
+# @st.cache
+# def load_model():
+# 	  return torch.load("path/to/model.pt")
 
 def main():
     # FLASK_URI = 'http://projet7-py0153.pythonanywhere.com/predict'
@@ -183,47 +234,48 @@ def main():
 
         pred = request_prediction(FLASK_URI, data) # [0]
         
+        display_result(pred)
         # Transforme la liste de pred["shap_values"] en valeur numérique
-        pred["shap_values"] = [round(float(value),3) for value in pred["shap_values"]]
+#         pred["shap_values"] = [round(float(value),3) for value in pred["shap_values"]]
         
-        st.write("La proba d'une défaillance du client est de {:.2f}"
-                 .format(pred["proba"]))
-        print("=== Les features plus importantes lors de cette prédiction sont : === {}"
-                .format(pred["features"]))
-        print("=== Les shapley_values correspondantes sont === {} "
-                .format(pred["shap_values"]))
+#         st.write("La proba d'une défaillance du client est de {:.2f}"
+#                  .format(pred["proba"]))
+#         print("=== Les features plus importantes lors de cette prédiction sont : === {}"
+#                 .format(pred["features"]))
+#         print("=== Les shapley_values correspondantes sont === {} "
+#                 .format(pred["shap_values"]))
 
-        features_importances = pd.DataFrame(pred["shap_values"], index=pred["features"])
-        features_importances["influence"]=["positive" if value>0 
-                                        else "negative" 
-                                        for value in pred["shap_values"]]
+#         features_importances = pd.DataFrame(pred["shap_values"], index=pred["features"])
+#         features_importances["influence"]=["positive" if value>0 
+#                                         else "negative" 
+#                                         for value in pred["shap_values"]]
         
-        # features_importances["sorting"] = [str(i) for i in features_importances.index]
+#         # features_importances["sorting"] = [str(i) for i in features_importances.index]
         
-        red = px.colors.qualitative.Set1[0]
-        blue = px.colors.qualitative.Set1[1]
-        color = [ [blue, red] if pred["shap_values"][0]>0 else [red, blue] ]
-        # color_discrete_sequence = [red if value<0 else blue
-        #                            for value in pred["shap_values"]]
-        # Comportement étrange: color_discrete_sequence doit avoir la dimension de 
-        #                       features_importances["influence"] mais plotly ne prend
-        #                       que les 2 premières comme si il affectait ces valeurs
-        #                       à "negative" et "positive".
-        color_discrete_sequence = [None]*10
-        color_discrete_sequence[:2] = color[0]
-        print(color_discrete_sequence)
-        fig = px.bar(features_importances,
-                     title="Importance des features sur la probabilité de défaillance",
-                     labels={"index":"Features Names", "value": "Features Importances"},
-                            #"variable": "SHAPley values"},
-                     color ="influence",
-                     color_discrete_sequence=color_discrete_sequence)
+#         red = px.colors.qualitative.Set1[0]
+#         blue = px.colors.qualitative.Set1[1]
+#         color = [ [blue, red] if pred["shap_values"][0]>0 else [red, blue] ]
+#         # color_discrete_sequence = [red if value<0 else blue
+#         #                            for value in pred["shap_values"]]
+#         # Comportement étrange: color_discrete_sequence doit avoir la dimension de 
+#         #                       features_importances["influence"] mais plotly ne prend
+#         #                       que les 2 premières comme si il affectait ces valeurs
+#         #                       à "negative" et "positive".
+#         color_discrete_sequence = [None]*10
+#         color_discrete_sequence[:2] = color[0]
+#         print(color_discrete_sequence)
+#         fig = px.bar(features_importances,
+#                      title="Importance des features sur la probabilité de défaillance",
+#                      labels={"index":"Features Names", "value": "Features Importances"},
+#                             #"variable": "SHAPley values"},
+#                      color ="influence",
+#                      color_discrete_sequence=color_discrete_sequence)
 
-        fig.update_layout(xaxis={'categoryorder': "array",
-                                 'categoryarray': 
-                                         [str(i) for i in features_importances.index]})
-        st.plotly_chart(fig)
-        
+#         fig.update_layout(xaxis={'categoryorder': "array",
+#                                  'categoryarray': 
+#                                          [str(i) for i in features_importances.index]})
+#         st.plotly_chart(fig)
+    
 if __name__ == '__main__':
     main()
 
