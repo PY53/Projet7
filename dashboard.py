@@ -181,8 +181,11 @@ def main():
         selection=[]
         if number_of_rows<1000 :  # En théorie 5000 ça passe mais ça ramme sur le PC
             
-            selection = aggrid_interactive_table(df = df[(df[options[0]]>=values[0]) & 
-                                                         (df[options[0]]<=values[1])])
+            # selection = aggrid_interactive_table(df = df[(df[options[0]]>=values[0]) & 
+            #                                              (df[options[0]]<=values[1])])
+            
+            selection = AgGrid(df[(df[options[0]]>=values[0]) & (df[options[0]]<=values[1])])
+            
             print("clés de selection :", selection.keys())
             # selection.data :  données d'entrées = df 
             # selection.selected_rows :  ligne(s) sélectionnée(s) par l'utilisateur (mais ne contient pas l'index du df)
