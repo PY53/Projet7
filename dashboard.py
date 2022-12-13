@@ -27,20 +27,20 @@ def aggrid_interactive_table(df: pd.DataFrame):
     Returns:
         dict: The selected row
     """
-    options = GridOptionsBuilder.from_dataframe(
-        df, enableRowGroup=True, enableValue=True, enablePivot=True
-    )
+    # options = GridOptionsBuilder.from_dataframe(
+    #     df, enableRowGroup=True, enableValue=True, enablePivot=True
+    # )
 
-    options.configure_side_bar()
+    # options.configure_side_bar()
 
-    options.configure_selection("single")
+    # options.configure_selection("single")
     selection = AgGrid(
         df,
-        enable_enterprise_modules=True,
-        gridOptions=options.build(),
-        theme="light",
-        update_mode=GridUpdateMode.SELECTION_CHANGED, # MODEL_CHANGED,
-        allow_unsafe_jscode=False, # True
+        # enable_enterprise_modules=True,
+        # gridOptions=options.build(),
+        # theme="light",
+        # update_mode=GridUpdateMode.SELECTION_CHANGED, # MODEL_CHANGED,
+        # allow_unsafe_jscode=False, # True
     )
 
     return selection
