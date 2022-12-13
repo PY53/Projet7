@@ -121,6 +121,8 @@ def display_result(pred):
 # @st.cache
 # def load_model():
 # 	  return torch.load("path/to/model.pt")
+def change_index():
+    st.session_state.change_index=True
 
 def main():
     # FLASK_URI = 'http://projet7-py0153.pythonanywhere.com/predict'
@@ -210,8 +212,7 @@ def main():
     # Pour permettre de sélectionner un index autre que celui filtré
     if 'change_index' not in st.session_state:
         st.session_state.change_index=False
-    def change_index():
-        st.session_state.change_index=True
+
 
     sample_index = st.number_input("Si vous souhaitez sélectionner un client directement\
                                     par son index dans la DataFrame d'origine, \
@@ -219,10 +220,11 @@ def main():
                                    'Prédire'",
                                    min_value=-1, max_value=len(df),  step=1, 
                                    on_change=change_index)
-    # st.write("change_index", st.session_state.change_index)
+    st.write("change_index : ", st.session_state.change_index)
     
     if st.session_state.change_index :
         data = [list(df.iloc[sample_index].values)]
+        st.write("data from df is loaded")
 
     predict_btn = st.button('Prédire')
        
