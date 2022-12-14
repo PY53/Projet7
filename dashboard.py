@@ -47,7 +47,6 @@ def aggrid_interactive_table(df: pd.DataFrame):
 
 
 def request_prediction(model_uri, data):
-    sys.stdout.flush()
     headers = {"Content-Type": "application/json"}
   
     print("============== data.shape :", np.shape(data))
