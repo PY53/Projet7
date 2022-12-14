@@ -26,6 +26,12 @@ import pandas as pd
 
 app = Flask(__name__)
 
+def filter_column_for_scaler(x):
+    return x.columns[x.nunique()>2]
+
+def filter_column_for_drop(x):
+    return x.columns[x.nunique()==1]
+
 @app.route("/")
 def root():
     return render_template("index.html")
@@ -59,26 +65,31 @@ def root():
 def make_prediction():
 
     print("========== loading model ==============")
-    loaded_model = joblib.load('model_lgbm.joblib')
+    # loaded_model = joblib.load('model_lgbm.joblib')
+    loaded_model = joblib.load('pipeline_40.joblib')
     print("========== model loaded ==============")
     
     # # on affiche le résultat sur la page index.html avec la méthode GET
     # msg = "========== model loaded =============="
     # return render_template("index.html", text_from_app=msg)
        
-    proba = np.nan
     print("============= request method : {}=============".format(request.method))
 
     if request.method=='POST':
         # Pour lancer une requête POST depuis l'invite de commande, taper dans l'invite de commande :
         # curl http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d "{\"data\": [[1, 2, 3, 4, 5, 6, 7, 8]]}"
+        
+        # Récupére le contenu de la requête sous format json
         data = request.get_json()
         # print("============= data: {}=============".format(data['data']))
         print("============= data shape: {}=============".format(np.shape(data['data'])))
         # print("============= data : {}=============".format(request.form['data']))
         
         # transforme data['data'] en valeur numérique
-        X = np.array([float(var) for var in data['data'][0]])
+        X = np.array([float(var) for var in data['data'][0]]).reshape(1, -1)
+        features_names = data['features_names']
+        data_df = pd.DataFrame(X, columns=features_names)
+        
     elif request.method=='GET':
         # Pour transmettre les arguments avec la méthode GET on passe par la barre d'adresse :
         # http://localhost:5000/predict?ARGUMENTS
@@ -89,32 +100,39 @@ def make_prediction():
         X = np.array([float(var) for var in data.values()])
     
     print("X shape = {}".format(X.shape))
-    if X.reshape(1, -1).shape != (1,732):
-        raise ValueError("X has not (1,732) size")
-    
+    if X.shape != (1,764):
+        raise ValueError("X has not (1,764) size")
+
+    proba = np.nan
     # print("============= X : {}=============".format(X))
-    proba = loaded_model.predict_proba(X.reshape(1, -1))[0][1]
+    proba = loaded_model.predict_proba(data_df)[0][1]
+    # proba = loaded_model.predict_proba(X)[0][1]
     # print("============= prediction : {}=============".format(proba))
     
     
     proba = proba.round(2)
     print("============= prediction : {}=============".format(proba))  
 
-    df = pd.read_csv('dataset/micro_dataset.csv', nrows=2)
-    explainer = shap.TreeExplainer(loaded_model)
+    # df = pd.read_csv('dataset/df_sub_01.csv', nrows=2)
+                                                        
+    explainer = shap.TreeExplainer(loaded_model[-1])   # le model est une pipeline
     start = time.time()
+    
+    # pour model pipeline : récupération des données transformées après process
+    X_trans = loaded_model[:-1].transform(data_df)  
+    features_names_out = loaded_model[:-1].get_feature_names_out()
+    
     # Shap_values contient 2 colonnes : une pour chaque classe.
     # On ne s'intéresse qu'à la classe 1
-    shap_values = explainer.shap_values(X.reshape(1, -1))[1]
+    shap_values = explainer.shap_values(X_trans)[1]
+    # shap_values = explainer.shap_values(X)[1]
     time_shapvalues = time.time()-start
     
     print(' ===== shap_values.shape', shap_values.shape)
     nfeat=10
-    # shap_values_df=pd.DataFrame(shap_values, columns=df.columns).\
-    #                             sort_values(by=0, axis=1, ascending=False).iloc[:,:nfeat]
     
     shap_values_df = pd.DataFrame(shap_values.reshape(-1, 1), 
-                                  index=df.columns, columns=["value"])
+                                  index=features_names_out, columns=["value"])
     shap_values_df["abs_value"] = abs(shap_values.reshape(-1, 1))
         
     shap_values_df = shap_values_df.sort_values(by="abs_value", axis=0,

@@ -46,12 +46,12 @@ def aggrid_interactive_table(df: pd.DataFrame):
     return selection
 
 
-def request_prediction(model_uri, data):
+def request_prediction(model_uri, data, features_names):
     headers = {"Content-Type": "application/json"}
   
     print("============== data.shape :", np.shape(data))
     print("===================data type = ", type(data))
-    data_json = {'data': data}
+    data_json = {'data': data, 'features_names': features_names}
     print("===================data_json type = ", type(data_json))
     print("predict url : ", model_uri)
     response = requests.request(method='POST', 
@@ -142,7 +142,8 @@ def main():
     st.title('Failure risk estimation for loan delivery')
 
     print("Lecture de la base de données")
-    df = pd.read_csv('dataset/micro_dataset.csv') # nrows=6)
+    df = pd.read_csv('dataset/df_sub_01.csv') # nrows=6)
+    features_names = df.columns.tolist()
     
     st.write("Data shape = {} ".format(df.shape))
     
@@ -204,7 +205,6 @@ def main():
                 st.write("Index sélectionné dans le DataFrame affiché est : ",
                          selected_row_index)  # ce n'est pas l'index de df
                 data = pd.DataFrame(selection.selected_rows)
-                features_names = data.columns[data.columns!="rowIndex"]
                 data = data[features_names].values.tolist()
     
     # Pour permettre de sélectionner un index autre que celui filtré
@@ -232,7 +232,7 @@ def main():
         
         pred = None
 
-        pred = request_prediction(FLASK_URI, data) # [0]
+        pred = request_prediction(FLASK_URI, data, features_names) # [0]
         
         display_result(pred)
         # Transforme la liste de pred["shap_values"] en valeur numérique
