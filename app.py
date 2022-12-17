@@ -24,13 +24,9 @@ import shap
 import time
 import pandas as pd
 
+
 app = Flask(__name__)
 
-def filter_column_for_scaler(x):
-    return x.columns[x.nunique()>2]
-
-def filter_column_for_drop(x):
-    return x.columns[x.nunique()==1]
 
 @app.route("/")
 def root():
@@ -62,11 +58,12 @@ def root():
     # return make_response(jsonify(df), 200, mimetype='application/json')
 
 @app.route("/predict", methods=['GET', 'POST'])
-def make_prediction():
 
+def make_prediction(): 
+    
     print("========== loading model ==============")
     # loaded_model = joblib.load('model_lgbm.joblib')
-    loaded_model = joblib.load('pipeline_40.joblib')
+    loaded_model = joblib.load('pipeline_40.joblib')    
     print("========== model loaded ==============")
     
     # # on affiche le résultat sur la page index.html avec la méthode GET
@@ -98,6 +95,12 @@ def make_prediction():
         data = request.args
         # transforme data['data'] en valeur numérique
         X = np.array([float(var) for var in data.values()])
+   
+    ########## test
+
+
+    
+    
     
     print("X shape = {}".format(X.shape))
     if X.shape != (1,764):
