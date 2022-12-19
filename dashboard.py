@@ -147,31 +147,38 @@ def main():
     
     st.write("Data shape = {} ".format(df.shape))
     
-    options = st.sidebar.multiselect(
-    'Par quelle feature souhaitez vous filtrer ?',
-    df.columns, 'CNT_CHILDREN')
+    # options = st.sidebar.multiselect(
+    # 'Par quelle feature souhaitez vous filtrer ?',
+    # df.columns, 'CNT_CHILDREN')
 
-    # st.write('You selected:', options)
+    options = st.sidebar.selectbox(
+    'Par quelle feature souhaitez vous filtrer ?',
+    df.columns, 0)
+    
+    st.write('You selected:', options)
     # filter_btn = st.button('Filtrer')
     
     if options:
 
-        fig = px.histogram(df[options])
-        st.plotly_chart(fig) # 
-    
-        x = df[options[0]].values
+        x = df[options].values
         x_min = float(x.min())
         x_max = float(x.max())
-        
-        # values = filter_slider(x_min, x_max)
-        # def filter_slider(x_min, x_max):
+
+        plot_spot = st.empty()  # une autre alternative serait d'utiliser les containers
+
         values = st.slider('Select a range of values',
                                 x_min, x_max, (x_min, x_max)) 
-        st.write('values:', values)
+        # st.write('values:', values)
+        
+        fig = px.histogram(df[options][(df[options]>=values[0]) & (df[options]<=values[1])])
+        
+        with plot_spot:
+            st.plotly_chart(fig) #
         
         # réduction du nombre de lignes, au-dessus de 200 MB 
-        # (pandas) utilise environ 4 fois la taille du tableau en mémoire 
-        number_of_rows = ((df[options[0]]>=values[0]) & (df[options[0]]<=values[1])).sum()
+        # (streamlit+pandas) utilise environ 4 fois la taille du tableau en mémoire 
+        number_of_rows = ((df[options]>=values[0]) & (df[options]<=values[1])).sum()
+        # number_of_rows = ((df[options[0]]>=values[0]) & (df[options[0]]<=values[1])).sum()
         st.write('Number of rows:', number_of_rows )  
         
         # proceed_btn = st.button('Proceed')
@@ -179,8 +186,11 @@ def main():
         selection=[]
         if number_of_rows<1000 :  # En théorie 5000 ça passe mais ça ramme sur le PC
             
-            selection = aggrid_interactive_table(df = df[(df[options[0]]>=values[0]) & 
-                                                         (df[options[0]]<=values[1])])
+            st.write('Attention! Le tableau interractif nécessite une connexion haut-débit sinon il fera planter le dashboard.')  
+            selection = aggrid_interactive_table(df = df[(df[options]>=values[0]) & 
+                                                         (df[options]<=values[1])])
+            # selection = aggrid_interactive_table(df = df[(df[options[0]]>=values[0]) & 
+            #                                              (df[options[0]]<=values[1])])
             print("clés de selection :", selection.keys())
             # selection.data :  données d'entrées = df 
             # selection.selected_rows :  ligne(s) sélectionnée(s) par l'utilisateur (mais ne contient pas l'index du df)
@@ -214,8 +224,8 @@ def main():
         st.session_state.change_index=True
 
     sample_index = st.number_input("Si vous souhaitez sélectionner un client directement\
-                                    par son index dans la DataFrame d'origine, \
-                                   indiquez son index, sinon appuyez directement sur \
+                                    par son id dans le DataFrame d'origine, \
+                                   indiquez le, sinon appuyez directement sur \
                                    'Prédire'",
                                    min_value=-1, max_value=len(df),  step=1, 
                                    on_change=change_index)
