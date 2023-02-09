@@ -158,21 +158,7 @@ Cette vérification a été réalisée pour chaque modèle. Ci-dessous LightGBM.
 ![png](Presentation_files/Presentation_9_0.png)
     
 Lightgbm
-
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -255,19 +241,6 @@ Nous tentons de corriger ce biais en utilisant différentes méthodes:
 - Smote (Imb_learn)
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
