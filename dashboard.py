@@ -145,8 +145,6 @@ def main():
     df = pd.read_csv('dataset/df_sub_01.csv') # nrows=6)
     features_names = df.columns.tolist()
     
-    st.write("Data shape = {} ".format(df.shape))
-    
     # options = st.sidebar.multiselect(
     # 'Par quelle feature souhaitez vous filtrer ?',
     # df.columns, 'CNT_CHILDREN')
